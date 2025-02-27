@@ -4,7 +4,7 @@ import router from './routes/index.js';
 import cors from 'cors';
 import path from 'path'
 const app = express();
-const port = 5000;
+const port = 8080;
 
 
 
