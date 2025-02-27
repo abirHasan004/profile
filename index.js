@@ -9,7 +9,7 @@ const port = 8080;
 
 
 app.use(cors({
-    origin: '*', // Change this in production
+    origin: 'https://profile.espnbangladesh.com',  
     credentials: true
 }));
 app.use(express.json());

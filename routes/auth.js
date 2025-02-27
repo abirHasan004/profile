@@ -46,7 +46,8 @@ AuthRouter.get('/user/:id', async (req, res) => {
 });
 AuthRouter.post('/user', async (req, res) => {
     try {
-     
+        console.error('callllllllll');
+
         await userSchema.validate(req.body, { abortEarly: false });
 
        
@@ -57,7 +58,7 @@ AuthRouter.post('/user', async (req, res) => {
     } catch (error) {
         console.error(error);
 
-       
+        console.error('callllllllll');
         if (error.name === "ValidationError") {
             return res.status(400).json({ errors: error.errors });
         }
