@@ -220,5 +220,76 @@ userRouter.post('/submitReview', async (req, res) => {
       return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
   });
+  userRouter.get("/profiles/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      let suggestedProfiles = [];
+      let topRatedProfiles = [];
+      const currentUser = await User.findById(userId);
+   
+  
+      if (currentUser) {
+    
+        suggestedProfiles = await User.find({
+          _id: { $ne: userId },
+          $or: [
+            { hobbies: { $in: currentUser?.hobbies[0] } },
+            { nationality: currentUser?.nationality },
+            { occupations: { $in: currentUser?.occupations } },
+          ],
+        })
+          .limit(8)
+          .populate("reviewIds");
+  
+     
+        if (suggestedProfiles.length < 8) {
+          const additionalProfiles = await User.aggregate([
+            { $match: { _id: { $ne: currentUser?._id } } },
+            { $sample: { size: Math.max(0, 8 - suggestedProfiles.length) } },
+          ]);
+          
+ 
+          const userIds = additionalProfiles.map(user => user._id) ;
+          
+           const reviews = await User.find({ '_id': { $in: userIds } }).populate('reviewIds');
+          
+ 
+          additionalProfiles.forEach(profile => {
+            const userReviews = reviews.find(review => review._id.toString() === profile._id.toString());
+            profile.reviewIds = userReviews ? userReviews.reviewIds : [];  
+          });
+          
+          suggestedProfiles = [...suggestedProfiles, ...additionalProfiles];
+        }
+      } else {
+       
+         suggestedProfiles = await User.aggregate([
+          { $sample: { size: 8 } },
+        ]);
+        
+         const userIds = suggestedProfiles.map(profile => profile._id) ;
+        
+         const reviews = await User.find({ '_id': { $in: userIds } }).populate('reviewIds');
+        
+         suggestedProfiles.forEach(profile => {
+          const userReviews = reviews.find(review => review._id.toString() === profile._id.toString());
+          profile.reviewIds = userReviews ? userReviews.reviewIds : []; 
+        });
+              
+      }
+  
+ 
+      topRatedProfiles = await User.find()
+        .sort({ reviewIds: -1 }) 
+        .limit(10)
+        .populate("reviewIds");
+  
+      res.status(200).json({ suggestedProfiles, topRatedProfiles });
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+  });
+  
   
 export default userRouter;  

@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema(
     address: { type: String, default: "" },
     userName: { type: String, required: true, unique: true },
     about: { type: String },
-    reviewIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],  
+    reviewIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],  
     profileImage: { type: String },
     giveReviewsUsersIds:[{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
   },
